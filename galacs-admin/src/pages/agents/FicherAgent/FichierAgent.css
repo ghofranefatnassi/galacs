@@ -1,0 +1,246 @@
+.fichAgentS1{
+    display:flex;align-items:center;gap:12px;margin-bottom:22px;
+}
+.fichAgentS2{
+    display:flex;flex-direction:column;gap:16px;
+}
+.fichAgentS3{
+    background:linear-gradient(135deg,#12103A,#0A1228);border:1px solid var(--border2);border-radius:18px;padding:26px;text-align:center;position:relative;overflow:hidden;
+}
+.fichAgentS4{
+    position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:radial-gradient(circle,rgba(245,158,11,.12) 0%,transparent 70%);pointer-events:none;
+}
+.fichAgentS5{
+    width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--primary));display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;margin:0 auto 14px;border:3px solid var(--border2);position:relative;
+}
+.fichAgentS6{
+    position:absolute;bottom:3px;right:3px;width:16px;height:16px;background:var(--green);border-radius:50%;border:3px solid #12103A;
+}
+.fichAgentS7{
+    font-size:22px;font-weight:800;margin-bottom:5px;
+}
+.fichAgentS8{
+    font-size:13px;color:var(--muted);margin-bottom:4px;
+}
+.fichAgentS9{
+    font-size:12px;color:var(--muted);margin-bottom:16px;
+}
+.fichAgentS10{
+    display:flex;gap:7px;justify-content:center;flex-wrap:wrap;
+}
+.fichAgentS11{
+    background:var(--gold3);color:var(--gold);border:1px solid var(--border2);
+}
+.fichAgentS12{
+    background:rgba(124,58,237,.12);color:#a78bfa;border:1px solid rgba(124,58,237,.25);
+}
+.fichAgentS13{
+    display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px;
+}
+.fichAgentS14{
+    font-weight:700;color:var(--white);
+}
+.fichAgentS15{
+    display:flex;gap:8px;flex-wrap:wrap;
+}
+.fichAgentS16{
+    background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.18);border-radius:20px;padding:5px 12px;font-size:11px;color:var(--green);
+}
+.fichAgentS17{
+    padding:16px;
+}
+.fichAgentS18{
+    font-size:18px;margin-bottom:6px;
+}
+.fichAgentS19{
+    font-size:22px;color:var(--accent);
+}
+.fichAgentS20{
+    font-size:22px;color:var(--green);
+}
+.fichAgentS21{
+    font-size:18px;color:var(--gold);
+}
+.fichAgentS22{
+    display:flex;flex-wrap:wrap;gap:8px;
+}
+
+.modal-overlay-crm {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-container-crm {
+  background: #0f1123;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.modal-small {
+  max-width: 340px;
+}
+
+.modal-icon-crm {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.modal-icon-crm svg {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.modal-title-crm {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #f1f5f9;
+}
+
+.modal-message-crm {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+.modal-actions-crm {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.modal-btn-crm {
+  padding: 8px 18px;
+  border-radius: 40px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.modal-btn-cancel {
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+.modal-btn-cancel:hover {
+  background: #334155;
+}
+
+.modal-btn-confirm {
+  background: #f59e0b;
+  color: #0f172a;
+}
+
+.modal-btn-confirm:hover {
+  background: #fbbf24;
+  transform: scale(1.02);
+}
+
+.password-input-crm {
+  background: #0a0c1a;
+  border: 1px solid #2d3a5e;
+  border-radius: 40px;
+  padding: 12px 16px;
+  color: white;
+  font-size: 0.9rem;
+  width: 100%;
+  outline: none;
+  transition: 0.2s;
+}
+
+.password-input-crm:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.toast-crm {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1100;
+  animation: slideInRight 0.3s ease;
+}
+
+.toast-content-crm {
+  background: #1e293b;
+  border-left: 4px solid #22c55e;
+  border-radius: 12px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  min-width: 260px;
+}
+
+.toast-icon-crm {
+  background: #22c55e20;
+  border-radius: 40px;
+  padding: 6px;
+  color: #22c55e;
+}
+
+.toast-title-crm {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin: 0;
+  color: #f1f5f9;
+}
+
+.toast-desc-crm {
+  font-size: 0.8rem;
+  margin: 2px 0 0;
+  color: #94a3b8;
+}
+
+.toast-close-crm {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: auto;
+}
+
+.toast-close-crm:hover {
+  color: #f1f5f9;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.alert-icon svg {
+  fill: #f97316;
+}

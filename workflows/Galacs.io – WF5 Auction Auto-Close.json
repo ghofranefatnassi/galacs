@@ -1,0 +1,354 @@
+{
+  "name": "Galacs.io – WF5 Auction Auto-Close",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "id": "a58849e7-21ec-4a40-bda4-eee40958bc2a",
+      "name": "Schedule – Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -960,
+        144
+      ],
+      "notes": "Vérifie toutes les 5 minutes les enchères expirées.\nClose_at < now() → déclenche la clôture automatique."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://odoo.world-wild-web.fr/web/dataset/call_kw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Galacs-Token",
+              "value": "HrIK+XDsHz1U6stPLD6myvvU3ZGkMlMV+mua5WO0FR4SdGSK+0V2AAT2UUp1l1o2yODbk82NCvOsEc5BBZfCvmYb+3alYW8EcjoXckICJDhaq/cqvqDV5L/lAQ=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"call\",\n  \"params\": {\n    \"model\": \"galacs.enchere\",\n    \"method\": \"search_read\",\n    \"args\": [[\n      [\"state\", \"=\", \"active\"],\n      [\"close_at\", \"<\", \"{{ new Date().toISOString() }}\"]\n    ]],\n    \"kwargs\": {\n      \"fields\": [\"id\", \"lead_id\", \"close_at\", \"state\", \"current_bid\", \"winning_agent_id\"],\n      \"limit\": 50\n    }\n  }\n}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "dc46aeeb-8141-4649-81ca-605d37cfe956",
+      "name": "Fetch Expired Auctions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        144
+      ],
+      "notes": "Récupère toutes les enchères actives dont close_at < maintenant.\nModèle Odoo : galacs.enchere\nStatut : active"
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst auctions = response.result || [];\n\nif (!Array.isArray(auctions) || auctions.length === 0) {\n  return [{ json: { expired_count: 0, auctions: [], message: 'No expired auctions found.' } }];\n}\n\nreturn auctions.map(auction => ({\n  json: {\n    auction_id: auction.id,\n    lead_id: Array.isArray(auction.lead_id) ? auction.lead_id[0] : auction.lead_id,\n    lead_name: Array.isArray(auction.lead_id) ? auction.lead_id[1] : 'Lead #' + auction.lead_id,\n    close_at: auction.close_at,\n    current_bid: auction.current_bid || 0,\n    winning_agent_id: Array.isArray(auction.winning_agent_id) ? auction.winning_agent_id[0] : null,\n    winning_agent_name: Array.isArray(auction.winning_agent_id) ? auction.winning_agent_id[1] : null,\n    has_winner: !!auction.winning_agent_id\n  }\n}));"
+      },
+      "id": "e66640c2-b6c2-4b59-88b9-f7296a0cfebe",
+      "name": "Parse Expired Auctions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        144
+      ],
+      "notes": "Parse la réponse Odoo.\nExtrait les données d'enchère : lead, enchère max, agent gagnant.\nDétecte si l'enchère a un gagnant ou non."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-winner-check",
+              "leftValue": "={{ $json.has_winner }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "388c2225-4817-4a01-b7ee-df02392215df",
+      "name": "Has Winner?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -240,
+        144
+      ],
+      "notes": "true  → enchère avec gagnant → clôturer et attribuer le lead\nfalse → enchère sans offre → clôturer et remettre en pipeline"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://odoo.world-wild-web.fr/api/encheres/close",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Galacs-Token",
+              "value": "HrIK+XDsHz1U6stPLD6myvvU3ZGkMlMV+mua5WO0FR4SdGSK+0V2AAT2UUp1l1o2yODbk82NCvOsEc5BBZfCvmYb+3alYW8EcjoXckICJDhaq/cqvqDV5L/lAQ=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"auction_id\": {{ $json.auction_id }},\n  \"lead_id\": {{ $json.lead_id }},\n  \"winning_agent_id\": {{ $json.winning_agent_id }},\n  \"final_bid\": {{ $json.current_bid }},\n  \"action\": \"close_with_winner\"\n}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "455f726c-5a62-4b6d-9d6a-ec60c9b9446d",
+      "name": "Close Auction – Assign Winner",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ],
+      "notes": "Clôture l'enchère et attribue le lead à l'agent gagnant.\nEndpoint Odoo : POST /api/encheres/close\nDéverrouille les contacts privés pour l'agent gagnant."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://odoo.world-wild-web.fr/api/encheres/close",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Galacs-Token",
+              "value": "HrIK+XDsHz1U6stPLD6myvvU3ZGkMlMV+mua5WO0FR4SdGSK+0V2AAT2UUp1l1o2yODbk82NCvOsEc5BBZfCvmYb+3alYW8EcjoXckICJDhaq/cqvqDV5L/lAQ=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"auction_id\": {{ $json.auction_id }},\n  \"lead_id\": {{ $json.lead_id }},\n  \"winning_agent_id\": null,\n  \"final_bid\": 0,\n  \"action\": \"close_no_bid\"\n}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "78e7916c-145f-472f-acb1-c20d0b30f84c",
+      "name": "Close Auction – No Bids",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        288
+      ],
+      "notes": "Enchère expirée sans offre → remet le lead dans le pipeline general.\nEndpoint Odoo : POST /api/encheres/close avec action=close_no_bid"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://odoo.world-wild-web.fr/api/notifications/remind",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Galacs-Token",
+              "value": "HrIK+XDsHz1U6stPLD6myvvU3ZGkMlMV+mua5WO0FR4SdGSK+0V2AAT2UUp1l1o2yODbk82NCvOsEc5BBZfCvmYb+3alYW8EcjoXckICJDhaq/cqvqDV5L/lAQ=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"agent_id\": {{ $json.winning_agent_id }},\n  \"lead_id\": {{ $json.lead_id }},\n  \"message\": \"🏆 FÉLICITATIONS ! Vous avez remporté l'enchère pour le lead '{{ $json.lead_name }}' avec une offre de {{ $json.current_bid }}€. Les coordonnées du prospect sont maintenant accessibles dans votre CRM Privé.\",\n  \"type\": \"auction_won\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "3012a86a-eb52-408c-a18a-b34128c9ba84",
+      "name": "Notify Winning Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "notes": "Envoie une notification SSE à l'agent gagnant.\nConfirme l'attribution du lead et le déverrouillage des contacts privés."
+    },
+    {
+      "parameters": {
+        "jsCode": "const closeResult = $('Close Auction – Assign Winner').first()?.json || {};\nconst lead = $('Parse Expired Auctions').first()?.json || {};\n\nreturn [{\n  json: {\n    status: 'auction_closed_with_winner',\n    auction_id: lead.auction_id,\n    lead_id: lead.lead_id,\n    lead_name: lead.lead_name,\n    winning_agent: lead.winning_agent_name,\n    final_bid: lead.current_bid,\n    closed_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "7fba1f5d-5ef2-4c67-af38-5448f2920e99",
+      "name": "Log Final – Winner",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "notes": "Log final : enchère clôturée avec gagnant."
+    },
+    {
+      "parameters": {
+        "jsCode": "const closeResult = $('Close Auction – No Bids').first()?.json || {};\nconst lead = $('Parse Expired Auctions').first()?.json || {};\n\nreturn [{\n  json: {\n    status: 'auction_closed_no_bids',\n    auction_id: lead.auction_id,\n    lead_id: lead.lead_id,\n    lead_name: lead.lead_name,\n    closed_at: new Date().toISOString(),\n    action: 'lead_returned_to_pipeline'\n  }\n}];"
+      },
+      "id": "0ae9eff6-7862-4b8a-839d-2bb8a4f7219e",
+      "name": "Log Final – No Bids",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        288
+      ],
+      "notes": "Log final : enchère clôturée sans offre, lead remis en pipeline."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule – Every 5 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Fetch Expired Auctions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Expired Auctions": {
+      "main": [
+        [
+          {
+            "node": "Parse Expired Auctions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Expired Auctions": {
+      "main": [
+        [
+          {
+            "node": "Has Winner?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Winner?": {
+      "main": [
+        [
+          {
+            "node": "Close Auction – Assign Winner",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Close Auction – No Bids",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Close Auction – Assign Winner": {
+      "main": [
+        [
+          {
+            "node": "Notify Winning Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Winning Agent": {
+      "main": [
+        [
+          {
+            "node": "Log Final – Winner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Close Auction – No Bids": {
+      "main": [
+        [
+          {
+            "node": "Log Final – No Bids",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "7efc553d-e1d5-41c3-9ae8-01bc21b5cec2",
+  "meta": {
+    "instanceId": "0356b649b335f6cc4a24ec6b9fcc6768d13f97ad2914e79d8e06fc7463475f44"
+  },
+  "id": "4eCO3cesW4WOYPxf",
+  "tags": [
+    {
+      "updatedAt": "2026-05-24T13:12:07.868Z",
+      "createdAt": "2026-05-24T13:12:07.868Z",
+      "id": "4j5CbFCL3Fwq5Fcg",
+      "name": "galacs.io"
+    },
+    {
+      "updatedAt": "2026-06-22T12:39:43.042Z",
+      "createdAt": "2026-06-22T12:39:43.042Z",
+      "id": "718haspIrUTfFjVL",
+      "name": "auction"
+    },
+    {
+      "updatedAt": "2026-06-22T12:39:43.396Z",
+      "createdAt": "2026-06-22T12:39:43.396Z",
+      "id": "BztmF3DSAcefD6pD",
+      "name": "auto-close"
+    }
+  ]
+}

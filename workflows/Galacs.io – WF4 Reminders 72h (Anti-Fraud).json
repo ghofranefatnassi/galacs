@@ -1,0 +1,355 @@
+{
+  "name": "Galacs.io – WF4 Reminders 72h (Anti-Fraud)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "aee59ae0-8578-4f18-b7cc-77ddbb34d99f",
+      "name": "Cron – Every 6 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -960,
+        144
+      ],
+      "notes": "Déclenche le contrôle anti-fraude toutes les 6 heures.\nVérifie les leads assignés bloqués depuis plus de 72h."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://odoo.world-wild-web.fr/web/dataset/call_kw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Galacs-Token",
+              "value": "HrIK+XDsHz1U6stPLD6myvvU3ZGkMlMV+mua5WO0FR4SdGSK+0V2AAT2UUp1l1o2yODbk82NCvOsEc5BBZfCvmYb+3alYW8EcjoXckICJDhaq/cqvqDV5L/lAQ=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"call\",\n  \"params\": {\n    \"model\": \"crm.lead\",\n    \"method\": \"search_read\",\n    \"args\": [[\n      [\"stage_pipeline\", \"not in\", [\"won\", \"lost\"]],\n      [\"user_id\", \"!=\", false],\n      [\"write_date\", \"<\", \"{{ new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString() }}\"]\n    ]],\n    \"kwargs\": {\n      \"fields\": [\"id\", \"name\", \"user_id\", \"stage_pipeline\", \"write_date\", \"partner_name\", \"galacs_reminder_count\"],\n      \"limit\": 100\n    }\n  }\n}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "0991bf2f-cbd6-4956-9274-c2e8c6a5628d",
+      "name": "Fetch Stalled Leads > 72h",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        144
+      ],
+      "notes": "Récupère depuis Odoo tous les leads assignés dont le statut n'a pas évolué depuis plus de 72h.\nChamps : id, nom, agent responsable, stage_pipeline, write_date, reminder_count."
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst leads = response.result || [];\n\nif (!Array.isArray(leads) || leads.length === 0) {\n  return [{ json: { stalled_count: 0, leads: [], message: 'No stalled leads found.' } }];\n}\n\nconst now = new Date();\nconst stalledLeads = leads.map(lead => {\n  const lastUpdate = new Date(lead.write_date);\n  const hoursStalled = Math.floor((now - lastUpdate) / (1000 * 60 * 60));\n  const reminderCount = lead.galacs_reminder_count || 0;\n  return {\n    id: lead.id,\n    name: lead.name || lead.partner_name || 'Lead #' + lead.id,\n    agent_id: Array.isArray(lead.user_id) ? lead.user_id[0] : lead.user_id,\n    agent_name: Array.isArray(lead.user_id) ? lead.user_id[1] : 'Unknown Agent',\n    stage_pipeline: lead.stage_pipeline,\n    hours_stalled: hoursStalled,\n    reminder_count: reminderCount,\n    escalate: reminderCount >= 3\n  };\n});\n\nreturn stalledLeads.map(l => ({ json: l }));"
+      },
+      "id": "9ff1bd0b-0f4e-429d-89d2-c2c22caad803",
+      "name": "Parse & Filter Stalled Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        144
+      ],
+      "notes": "Parse la réponse Odoo.\nCalcule le nombre d'heures de blocage.\nDétecte les leads à escalader (reminder_count >= 3)."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "escalate-check",
+              "leftValue": "={{ $json.escalate }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "750ff139-f4d5-4eb7-910c-367194153d12",
+      "name": "Escalate or Remind?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -240,
+        144
+      ],
+      "notes": "true  → 3+ rappels sans réponse → escalade admin\nfalse → envoyer rappel SSE à l'agent"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://odoo.world-wild-web.fr/api/notifications/remind",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Galacs-Token",
+              "value": "HrIK+XDsHz1U6stPLD6myvvU3ZGkMlMV+mua5WO0FR4SdGSK+0V2AAT2UUp1l1o2yODbk82NCvOsEc5BBZfCvmYb+3alYW8EcjoXckICJDhaq/cqvqDV5L/lAQ=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ lead_id: $('Parse & Filter Stalled Leads').item.json.id, agent_id: $('Parse & Filter Stalled Leads').item.json.agent_id, message: `⚠️ RAPPEL ANTI-FRAUDE : Le lead '${$('Parse & Filter Stalled Leads').item.json.name}' est bloqué en étape '${$('Parse & Filter Stalled Leads').item.json.stage_pipeline}' depuis ${$('Parse & Filter Stalled Leads').item.json.hours_stalled}h.`, type: \"anti_fraud_reminder\", hours_stalled: $('Parse & Filter Stalled Leads').item.json.hours_stalled, reminder_count: $('Parse & Filter Stalled Leads').item.json.reminder_count }) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "420ec9f3-d90e-49b7-af9e-ca02d59300c3",
+      "name": "Send SSE Reminder to Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        288
+      ],
+      "notes": "Envoie une notification SSE à l'agent responsable du lead bloqué.\nEndpoint Odoo : POST /api/notifications/remind"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://odoo.world-wild-web.fr/api/notifications/escalate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Galacs-Token",
+              "value": "HrIK+XDsHz1U6stPLD6myvvU3ZGkMlMV+mua5WO0FR4SdGSK+0V2AAT2UUp1l1o2yODbk82NCvOsEc5BBZfCvmYb+3alYW8EcjoXckICJDhaq/cqvqDV5L/lAQ=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"lead_id\": {{ $json.id }},\n  \"agent_id\": {{ $json.agent_id }},\n  \"agent_name\": \"{{ $json.agent_name }}\",\n  \"message\": \"🚨 ESCALADE ADMINISTRATIVE : Le lead '{{ $json.name }}' est bloqué depuis {{ $json.hours_stalled }}h. L'agent {{ $json.agent_name }} n'a pas répondu après {{ $json.reminder_count }} rappels. Révision administrative requise.\",\n  \"type\": \"admin_escalation\",\n  \"hours_stalled\": {{ $json.hours_stalled }},\n  \"reminder_count\": {{ $json.reminder_count }}\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "153d5df5-3edc-41a5-9c92-7f19544bda8c",
+      "name": "Escalate to Admin Review",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ],
+      "notes": "3 rappels sans réponse → escalade à l'administrateur.\nEndpoint Odoo : POST /api/notifications/escalate\nFlagge le lead pour révision administrative."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://odoo.world-wild-web.fr/web/dataset/call_kw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Galacs-Token",
+              "value": "HrIK+XDsHz1U6stPLD6myvvU3ZGkMlMV+mua5WO0FR4SdGSK+0V2AAT2UUp1l1o2yODbk82NCvOsEc5BBZfCvmYb+3alYW8EcjoXckICJDhaq/cqvqDV5L/lAQ=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"call\",\n  \"params\": {\n    \"model\": \"galacs.ia.log\",\n    \"method\": \"create\",\n    \"args\": [{\n      \"lead_id\": {{ $json.id }},\n      \"type\": \"anti_fraud_reminder\",\n      \"message\": \"Rappel 72h envoyé — Lead bloqué depuis {{ $json.hours_stalled }}h — Étape: {{ $json.stage_pipeline }} — Rappel #{{ $json.reminder_count + 1 }}\",\n      \"agent_id\": {{ $json.agent_id }}\n    }],\n    \"kwargs\": {}\n  }\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "0d654d67-ea8d-4771-8f08-99881e36c054",
+      "name": "Log Reminder in galacs.ia.log",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        288
+      ],
+      "notes": "Enregistre le rappel dans galacs.ia.log (modèle Odoo).\nPermet l'audit complet des relances anti-fraude."
+    },
+    {
+      "parameters": {
+        "jsCode": "const remind = $('Send SSE Reminder to Agent').first()?.json || {};\nconst lead = $('Parse & Filter Stalled Leads').first()?.json || {};\n\nreturn [{\n  json: {\n    status: 'reminder_sent',\n    lead_id: lead.id,\n    lead_name: lead.name,\n    agent_name: lead.agent_name,\n    hours_stalled: lead.hours_stalled,\n    reminder_count: (lead.reminder_count || 0) + 1,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "d94592be-adee-42f9-bf3e-6a0a16d62085",
+      "name": "Log Final – Reminder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        288
+      ],
+      "notes": "Log final de confirmation pour le rappel SSE."
+    },
+    {
+      "parameters": {
+        "jsCode": "const escalate = $('Escalate to Admin Review').first()?.json || {};\nconst lead = $('Parse & Filter Stalled Leads').first()?.json || {};\n\nreturn [{\n  json: {\n    status: 'escalated_to_admin',\n    lead_id: lead.id,\n    lead_name: lead.name,\n    agent_name: lead.agent_name,\n    hours_stalled: lead.hours_stalled,\n    reminder_count: lead.reminder_count,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "0d1b11ea-4537-4ef7-bf79-ce3fc2ebd217",
+      "name": "Log Final – Escalation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "notes": "Log final de confirmation pour l'escalade administrative."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Cron – Every 6 Hours": {
+      "main": [
+        [
+          {
+            "node": "Fetch Stalled Leads > 72h",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Stalled Leads > 72h": {
+      "main": [
+        [
+          {
+            "node": "Parse & Filter Stalled Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Filter Stalled Leads": {
+      "main": [
+        [
+          {
+            "node": "Escalate or Remind?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escalate or Remind?": {
+      "main": [
+        [
+          {
+            "node": "Escalate to Admin Review",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send SSE Reminder to Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send SSE Reminder to Agent": {
+      "main": [
+        [
+          {
+            "node": "Log Reminder in galacs.ia.log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Reminder in galacs.ia.log": {
+      "main": [
+        [
+          {
+            "node": "Log Final – Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escalate to Admin Review": {
+      "main": [
+        [
+          {
+            "node": "Log Final – Escalation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "99e0d8aa-edff-4fb1-bdb1-6505f9fc35a2",
+  "meta": {
+    "instanceId": "0356b649b335f6cc4a24ec6b9fcc6768d13f97ad2914e79d8e06fc7463475f44"
+  },
+  "id": "S66DsW2QtMbcqMTI",
+  "tags": [
+    {
+      "updatedAt": "2026-05-24T13:12:07.868Z",
+      "createdAt": "2026-05-24T13:12:07.868Z",
+      "id": "4j5CbFCL3Fwq5Fcg",
+      "name": "galacs.io"
+    },
+    {
+      "updatedAt": "2026-06-21T10:17:40.988Z",
+      "createdAt": "2026-06-21T10:17:40.988Z",
+      "id": "hh9AiuwcIBCpzjQA",
+      "name": "anti-fraud"
+    },
+    {
+      "updatedAt": "2026-06-21T10:17:41.001Z",
+      "createdAt": "2026-06-21T10:17:41.001Z",
+      "id": "pkz1nBPkE9OrzRCA",
+      "name": "reminders"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+.dVenteS1{
+    display:flex;align-items:center;gap:12px;margin-bottom:22px;
+}
+.dVenteS2{
+    display:flex;flex-direction:column;gap:16px;
+}
+.dVenteS3{
+    background:linear-gradient(135deg,rgba(34,197,94,.06),var(--card));border:1px solid rgba(34,197,94,.2);border-radius:18px;padding:22px;
+}
+.dVenteS4{
+    display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;
+}
+.dVenteS5{
+    font-size:20px;font-weight:800;margin-bottom:4px;
+}
+.dVenteS6{
+    font-size:13px;color:var(--muted);
+}
+.dVenteS7{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.dVenteS8{
+    background:rgba(255,255,255,.04);border-radius:10px;padding:12px;
+}
+.dVenteS9{
+    font-size:11px;color:var(--muted);margin-bottom:3px;
+}
+.dVenteS10{
+    font-size:14px;font-weight:600;
+}
+.dVenteS11{
+    font-size:18px;font-weight:800;color:var(--green);
+}
+.dVenteS12{
+    font-size:18px;font-weight:800;color:var(--gold);
+}
+.dVenteS13{
+    flex:1;font-size:13px;font-weight:500;
+}
+.dVenteS14{
+    font-size:12px;color:var(--muted);
+}
+.dVenteS15{
+    font-size:20px;margin-bottom:6px;
+}
+.dVenteS16{
+    font-size:13px;font-weight:600;color:var(--gold);
+}
+.dVenteS17{
+    background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.18);border-radius:12px;padding:14px;margin-bottom:10px;
+}
+.dVenteS18{
+    display:flex;align-items:center;gap:10px;margin-bottom:8px;
+}
+.dVenteS19{
+    font-size:13px;font-weight:600;color:var(--green);
+}
+.dVenteS20{
+    color:var(--gold);font-family:'Montserrat',sans-serif;font-weight:700;
+}
+.dVenteS21{
+    font-size:12px;color:var(--muted);margin-top:4px;
+}
+.dVenteS22{
+    display:flex;gap:10px;
+}
+.dVenteS23{
+    flex:2;padding:13px;background:linear-gradient(135deg,var(--green),#16a34a);color:#fff;box-shadow:0 4px 16px rgba(34,197,94,.3);justify-content:center;
+}
+.dVenteS24{
+    flex:1;padding:13px;justify-content:center;
+}
+.dVenteS25{
+    flex:2;padding:13px;background:linear-gradient(135deg,var(--gold),#D97706);color:#fff;box-shadow:0 4px 16px rgba(245,158,11,.12);justify-content:center;
+}

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Record Rules Galacs.io – Contacts Privés
+        Isolation STRICTE : un agent ne voit et ne modifie QUE ses propres contacts.
+        Aucun accès administrateur (aucun group_system bypass).
+    -->
+    <record id="galacs_contact_prive_rule_own" model="ir.rule">
+        <field name="name">Galacs – Contact privé : accès propriétaire uniquement</field>
+        <field name="model_id" ref="model_galacs_contact_prive"/>
+        <field name="domain_force">[('agent_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <!--
+        Règle admin : aucun accès aux données chiffrées.
+        Les admins peuvent uniquement voir les métadonnées non-sensibles (alias, zone).
+        Note : pour un isolement complet en production, retirer le group_system de
+        ir.model.access et gérer l'accès uniquement via ces record rules.
+    -->
+</odoo>

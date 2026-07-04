@@ -1,0 +1,98 @@
+.disLogin{
+    padding-top:0;
+}
+.loginMainDis{
+    display:flex;height:100vh;
+}
+.loginS1{
+    flex:1;display:flex;align-items:center;justify-content:center;padding:60px;background:linear-gradient(135deg,#07080F 0%,#0E1228 50%,#07080F 100%);position:relative;overflow:hidden;
+}
+.loginS2{
+    position:absolute;inset:0;background:radial-gradient(ellipse 600px 500px at 40% 45%,rgba(124,58,237,.16) 0%,transparent 70%);pointer-events:none;
+}
+.loginS3{
+    max-width:420px;width:100%;position:relative;
+}
+.loginS4{
+    display:flex;align-items:center;gap:14px;margin-bottom:44px;
+}
+.galacLogoLogin{
+    object-fit: contain;
+    height: 90px;
+    width: 90px;
+}
+.loginS5{
+    font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;letter-spacing:.1em;background:linear-gradient(90deg, rgba(0,24,51,1) 0%, rgba(102,33,114,1) 25%, rgba(255,103,31,1) 50%, rgba(141,33,102,1) 75%, rgba(0,24,51,1) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.loginS6{
+    font-size:12px;color:var(--muted);letter-spacing:.2em;
+}
+.loginS7{
+    font-size:32px;margin-bottom:8px;
+}
+.loginS8{
+    color:var(--muted);font-size:15px;margin-bottom:36px;
+}
+.loginS9{
+    display:flex;justify-content:flex-end;margin-bottom:28px;
+}
+.loginS10{
+    font-size:13px;color:var(--accent);cursor:pointer;
+}
+.login11{
+    text-align:center;margin-top:20px;font-size:13px;color:var(--muted);
+}
+.loginS12{
+    color:var(--accent);cursor:pointer;
+}
+.loginS13{
+    width:45%;background:linear-gradient(135deg,#0E1228,#141E3C);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+}
+.loginS14{
+    position:absolute;inset:0;background:radial-gradient(ellipse 500px 500px at 50% 40%,rgba(124,58,237,.2) 0%,transparent 70%);
+}
+.loginS15{
+    text-align:center;padding:40px;position:relative;z-index:1;
+}
+.loginS16{
+    width:200px;height:200px;margin:0 auto 32px;position:relative;
+}
+.loginS17{
+    animation:spin 20s linear infinite;
+}
+.loginS18{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+}
+.loginS19{
+    width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,rgba(124,58,237,.3),rgba(94,81,138,.2));border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 40px rgba(124,58,237,.3);
+}
+.loginS20{
+    position:absolute;top:10px;right:10px;width:36px;height:36px;background:rgba(34,197,94,.2);border:1px solid rgba(34,197,94,.4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 0 14px rgba(34,197,94,.3);
+}
+.loginS21{
+    position:absolute;bottom:20px;left:5px;width:32px;height:32px;background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;
+}
+.loginS22{
+    font-family:'Montserrat',sans-serif;font-size:22px;font-weight:800;margin-bottom:12px;
+}
+.loginS23{
+    font-size:14px;color:var(--muted);line-height:1.7;max-width:280px;margin:0 auto;
+}
+.loginS24{
+    display:flex;gap:24px;margin-top:36px;justify-content:center;
+}
+.logins25{
+    text-align:center;
+}
+.loginS26{
+    font-family:'Montserrat',sans-serif;font-size:24px;font-weight:800;color:var(--green);
+}
+.logins27{
+    font-size:11px;color:var(--muted);
+}
+.loginS28{
+    font-family:'Montserrat',sans-serif;font-size:24px;font-weight:800;color:var(--orange);
+}
+.loginS29{
+    font-family:'Montserrat',sans-serif;font-size:24px;font-weight:800;color:#a78bfa;
+}

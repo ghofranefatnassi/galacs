@@ -1,0 +1,167 @@
+.dashS1{
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;
+}
+.dashS2{
+    display:flex;gap:8px;
+}
+.dashS3{
+    background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;margin-bottom:22px;animation:lpulse 2.5s infinite;
+}
+.dashS4{
+    width:38px;height:38px;background:rgba(245,158,11,.14);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;
+}
+.dashS5{
+    font-size:14px;font-weight:600;color:var(--orange);
+}
+.dashS6{
+    font-size:12px;color:var(--muted);margin-top:2px;
+}
+.dashS7{
+    display:flex;align-items:center;gap:8px;
+}
+.dashS8{
+    color:var(--gold);
+}
+.dashS9{
+    color:var(--orange);
+}
+.dashS10{
+    color:var(--green);
+}
+.dashS11{
+    font-size:22px;color:#a78bfa;
+}
+.dashS12{
+    display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;
+}
+.dashS13{
+    background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.18);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;
+}
+.dashS14{
+    display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;
+}
+.dashS15{
+    font-size:15px;font-weight:700;
+}
+.dashS16{
+    font-size:12px;color:var(--muted);
+}
+.dashS17{
+    font-size:20px;font-weight:800;color:var(--green);
+}
+.dashS18{
+    background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.18);border-radius:12px;padding:16px;cursor:pointer;
+}
+.dash19{
+    display:flex;flex-direction:column;gap:10px;
+}
+.dash20{
+    font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:var(--gold);width:22px;
+}
+.dashS21{
+    background:linear-gradient(135deg,#6025C4,#7C3AED);
+}
+.dashS22{
+    font-size:13px;font-weight:600;
+}
+.dashS23{
+    font-size:11px;color:var(--muted);
+}
+.dashS24{
+    width:80px;margin-top:4px;
+}
+.dashS25{
+    width:92%;background:var(--green);
+}
+.dash26{
+    font-size:15px;font-weight:800;color:var(--green);
+}
+.dashS27{
+    font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:var(--muted);width:22px;
+}
+.dashS28{
+    background:linear-gradient(135deg,var(--gold),#D97706);
+}
+.dashS29{
+    width:78%;background:var(--accent);
+}
+.dashS30{
+    font-size:15px;font-weight:800;color:var(--accent);
+}
+.dashS31{
+    background:linear-gradient(135deg,#059669,var(--green));
+}
+.dashS32{
+    border-color:rgba(245,158,11,.18);
+}
+.dashS33{
+    width:65%;background:var(--accent);
+}
+.dashS34{
+    font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;color:var(--red);width:22px;
+}
+.dashS35{
+    background:linear-gradient(135deg,#be185d,#9d174d);
+}
+.dashS36{
+    font-size:11px;color:var(--orange);
+}
+.dashS37{
+    width:42%;background:var(--orange);
+}
+.dashS38{
+    font-size:15px;font-weight:800;color:var(--orange);
+}
+.dashS39{
+    grid-column:span 2;
+}
+.dashS40{
+    height:45%;background:linear-gradient(180deg,var(--primary),rgba(94,81,138,.2));border-radius:6px 6px 0 0;
+}
+.dashS41{
+    color:var(--muted);
+}
+.dashS42{
+    color:var(--gold);
+}
+.dashS43{
+    height:58%;background:linear-gradient(180deg,var(--primary),rgba(94,81,138,.2));border-radius:6px 6px 0 0;
+}
+.dashS44{
+    height:52%;background:linear-gradient(180deg,var(--primary),rgba(94,81,138,.2));border-radius:6px 6px 0 0;
+}
+.dashS45{
+    height:62%;background:linear-gradient(180deg,var(--accent),rgba(124,58,237,.2));border-radius:6px 6px 0 0;
+}
+.dashS46{
+    height:68%;background:linear-gradient(180deg,var(--accent),rgba(124,58,237,.2));border-radius:6px 6px 0 0;
+}
+.dashS47{
+    height:80%;background:linear-gradient(180deg,var(--gold),rgba(245,158,11,.2));border:1px solid var(--border2);border-radius:6px 6px 0 0;
+}
+.dashS48{
+    background:var(--green);
+}
+.dashS49{
+    background:var(--orange);
+}
+.dashS50{
+    background:var(--red);
+}
+.dashS51{
+    font-size:12px;font-weight:600;
+}
+.card-gold, .card {
+  animation: chartFadeIn 0.5s ease-out;
+}
+
+@keyframes chartFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

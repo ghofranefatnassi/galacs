@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="galacs_vente_form_view" model="ir.ui.view">
+        <field name="name">galacs.vente.form</field>
+        <field name="model">galacs.vente</field>
+        <field name="arch" type="xml">
+            <form string="Déclaration de Vente">
+                <header>
+                    <button name="action_submit" string="Soumettre" type="object"
+                            invisible="state != 'draft'" class="btn-primary"/>
+                    <button name="action_validate" string="Valider" type="object"
+                            invisible="state != 'pending_admin'"
+                            groups="base.group_system" class="btn-success"/>
+                    <button name="action_reject" string="Rejeter" type="object"
+                            invisible="state != 'pending_admin'"
+                            groups="base.group_system" class="btn-danger"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,pending_admin,validated"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Lead &amp; Agent">
+                            <field name="lead_id"/>
+                            <field name="agent_id"/>
+                        </group>
+                        <group string="Informations Vente">
+                            <field name="reference_bien"/>
+                            <field name="date_signature"/>
+                            <field name="acheteur_nom"/>
+                            <field name="vendeur_nom"/>
+                            <field name="prix_vente" widget="monetary"/>
+                            <field name="verification_mode"/>
+                        </group>
+                    </group>
+                    <group string="Pièces justificatives">
+                        <field name="attachment_ids" widget="many2many_binary" nolabel="1"/>
+                    </group>
+                    <group string="Résultat">
+                        <field name="admin_comment"/>
+                        <field name="api_response" readonly="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="galacs_vente_list_view" model="ir.ui.view">
+        <field name="name">galacs.vente.list</field>
+        <field name="model">galacs.vente</field>
+        <field name="arch" type="xml">
+            <tree string="Ventes" decoration-success="state == 'validated'"
+                  decoration-danger="state == 'rejected'">
+                <field name="create_date"/>
+                <field name="lead_id"/>
+                <field name="agent_id"/>
+                <field name="reference_bien"/>
+                <field name="date_signature"/>
+                <field name="prix_vente"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="galacs_vente_action" model="ir.actions.act_window">
+        <field name="name">Déclarations de vente</field>
+        <field name="res_model">galacs.vente</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="galacs_menu_ventes"
+              name="Ventes"
+              parent="galacs_leads.galacs_menu_root"
+              action="galacs_vente_action"
+              sequence="30"/>
+</odoo>

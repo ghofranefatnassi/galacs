@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_galacs_enchere_admin,galacs.enchere admin,model_galacs_enchere,base.group_system,1,1,1,1
+access_galacs_enchere_user,galacs.enchere user,model_galacs_enchere,base.group_user,1,1,1,0
+access_galacs_enchere_bid_admin,galacs.enchere.bid admin,model_galacs_enchere_bid,base.group_system,1,1,1,1
+access_galacs_enchere_bid_user,galacs.enchere.bid user,model_galacs_enchere_bid,base.group_user,1,1,1,0

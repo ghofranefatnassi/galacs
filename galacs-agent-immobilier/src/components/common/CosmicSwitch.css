@@ -1,0 +1,286 @@
+.cosmic-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  transform-style: preserve-3d;
+  perspective: 120px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.cosmic-toggle.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.toggle {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, #1a1a2e, #16213e);
+  border-radius: 24px;
+  transition: 0.4s;
+  transform-style: preserve-3d;
+  box-shadow:
+    0 0 6px rgba(0, 0, 0, 0.5),
+    inset 0 0 4px rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.cosmos {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(0.6px 0.6px at 10% 10%, #fff 100%, transparent),
+    radial-gradient(0.6px 0.6px at 20% 20%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 30% 30%, #fff 100%, transparent),
+    radial-gradient(0.6px 0.6px at 40% 40%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 50% 50%, #fff 100%, transparent),
+    radial-gradient(0.6px 0.6px at 60% 60%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 70% 70%, #fff 100%, transparent),
+    radial-gradient(0.6px 0.6px at 80% 80%, #fff 100%, transparent),
+    radial-gradient(0.6px 0.6px at 90% 90%, #fff 100%, transparent);
+  background-size: 200% 200%;
+  opacity: 0.1;
+  transition: 0.4s;
+}
+
+.toggle-orb {
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background: linear-gradient(145deg, #ff6b6b, #4ecdc4);
+  border-radius: 50%;
+  transition: 0.45s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform-style: preserve-3d;
+  z-index: 2;
+}
+
+.inner-orb {
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #fff, #e6e6e6);
+  transition: 0.4s;
+  overflow: hidden;
+}
+
+.inner-orb::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(0, 0, 0, 0.1) 12deg,
+    transparent 24deg
+  );
+  animation: patternRotate 6s linear infinite;
+}
+
+.ring {
+  position: absolute;
+  inset: -2px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  transition: 0.4s;
+}
+
+.toggle:checked + .slider {
+  background: linear-gradient(45deg, #16213e, #1a1a2e);
+}
+
+.toggle:checked + .slider .toggle-orb {
+  transform: translateX(20px) rotate(360deg);
+  background: linear-gradient(145deg, #4ecdc4, #45b7af);
+}
+
+.toggle:checked + .slider .inner-orb {
+  background: linear-gradient(145deg, #45b7af, #3da89f);
+  transform: scale(0.85);
+}
+
+.toggle:checked + .slider .ring {
+  border-color: rgba(78, 205, 196, 0.4);
+  animation: ringPulse 1.6s infinite;
+}
+
+.energy-line {
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(78, 205, 196, 0.6),
+    transparent
+  );
+  transform-origin: left;
+  opacity: 0;
+  transition: 0.4s;
+}
+
+.energy-line:nth-child(2) {
+  top: 20%;
+  transform: rotate(15deg);
+}
+
+.energy-line:nth-child(3) {
+  top: 50%;
+  transform: rotate(0deg);
+}
+
+.energy-line:nth-child(4) {
+  top: 80%;
+  transform: rotate(-15deg);
+}
+
+.toggle:checked + .slider .energy-line {
+  opacity: 1;
+  animation: energyFlow 1.6s linear infinite;
+}
+
+.particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #4ecdc4;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.toggle:checked + .slider .particle {
+  animation: particleBurst 0.8s ease-out infinite;
+}
+
+.particle:nth-child(5) {
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.particle:nth-child(6) {
+  left: 40%;
+  animation-delay: 0.15s;
+}
+
+.particle:nth-child(7) {
+  left: 60%;
+  animation-delay: 0.3s;
+}
+
+.particle:nth-child(8) {
+  left: 80%;
+  animation-delay: 0.45s;
+}
+
+.particle:nth-child(9) {
+  left: 30%;
+  animation-delay: 0.6s;
+}
+
+.particle:nth-child(10) {
+  left: 70%;
+  animation-delay: 0.75s;
+}
+
+/* Hover (scaled down intensity) */
+.slider:hover .toggle-orb {
+  filter: brightness(1.2);
+  box-shadow:
+    0 0 8px rgba(78, 205, 196, 0.5),
+    0 0 12px rgba(78, 205, 196, 0.3);
+}
+
+.slider:hover .cosmos {
+  opacity: 0.2;
+  animation: cosmosPan 12s linear infinite;
+}
+
+.cosmic-toggle:hover .slider {
+  transform: rotateX(6deg) rotateY(6deg);
+}
+
+.cosmic-toggle:hover .toggle-orb {
+  transform: translateZ(4px);
+}
+
+.toggle:active + .slider .toggle-orb {
+  transform: scale(0.95);
+}
+
+@keyframes ringPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.7;
+  }
+}
+
+@keyframes patternRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes energyFlow {
+  0% {
+    transform: scaleX(0) translateX(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scaleX(1) translateX(50%);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scaleX(0) translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes particleBurst {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(
+        calc(cos(var(--angle)) * 18px),
+        calc(sin(var(--angle)) * 18px)
+      )
+      scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes cosmosPan {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 200%;
+  }
+}

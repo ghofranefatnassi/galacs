@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_galacs_ia_log_admin,galacs.ia.log admin,model_galacs_ia_log,base.group_system,1,1,1,1
+access_galacs_ia_log_user,galacs.ia.log user,model_galacs_ia_log,base.group_user,1,0,0,0
+access_galacs_zone_admin,galacs.zone admin,model_galacs_zone,base.group_system,1,1,1,1
+access_galacs_zone_user,galacs.zone user,model_galacs_zone,base.group_user,1,0,0,0

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="galacs_contact_prive_form_view" model="ir.ui.view">
+        <field name="name">galacs.contact.prive.form</field>
+        <field name="model">galacs.contact.prive</field>
+        <field name="arch" type="xml">
+            <form string="Contact Privé">
+                <header>
+                    <button name="action_convert_to_lead"
+                            string="Convertir en lead d'enchère"
+                            type="object"
+                            invisible="converted_to_lead == True"
+                            class="btn-warning"/>
+                </header>
+                <sheet>
+                    <group string="Identification (non-sensible)">
+                        <field name="alias"/>
+                        <field name="zone_chalandise"/>
+                        <field name="type_bien"/>
+                        <field name="agent_id" readonly="1"/>
+                    </group>
+                    <group string="Données chiffrées (AES-GCM, déchiffrées côté client uniquement)">
+                        <field name="nom_encrypted" string="Nom (chiffré)"/>
+                        <field name="telephone_encrypted" string="Téléphone (chiffré)"/>
+                        <field name="email_encrypted" string="Email (chiffré)"/>
+                        <field name="linkedin_encrypted" string="LinkedIn (chiffré)"/>
+                        <field name="notes_encrypted" string="Notes (chiffrées)" widget="text"/>
+                    </group>
+                    <group string="Conversion" invisible="converted_to_lead == False">
+                        <field name="converted_to_lead" readonly="1"/>
+                        <field name="converted_lead_id" readonly="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="galacs_contact_prive_list_view" model="ir.ui.view">
+        <field name="name">galacs.contact.prive.list</field>
+        <field name="model">galacs.contact.prive</field>
+        <field name="arch" type="xml">
+            <tree string="Mes Contacts Privés">
+                <field name="alias"/>
+                <field name="zone_chalandise"/>
+                <field name="type_bien"/>
+                <field name="converted_to_lead"/>
+                <field name="create_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="galacs_contact_prive_action" model="ir.actions.act_window">
+        <field name="name">Mes Contacts Privés</field>
+        <field name="res_model">galacs.contact.prive</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="galacs_menu_contacts_prives"
+              name="Mes Contacts Privés"
+              parent="galacs_leads.galacs_menu_root"
+              action="galacs_contact_prive_action"
+              sequence="50"/>
+</odoo>

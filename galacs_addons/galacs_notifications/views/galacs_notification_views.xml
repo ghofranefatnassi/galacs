@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="galacs_notification_list_view" model="ir.ui.view">
+        <field name="name">galacs.notification.list</field>
+        <field name="model">galacs.notification</field>
+        <field name="arch" type="xml">
+            <tree string="Notifications" default_order="create_date desc">
+                <field name="create_date"/>
+                <field name="event_type"/>
+                <field name="recipient_id"/>
+                <field name="sent_via_bus"/>
+                <field name="sent_via_email"/>
+                <field name="suppressed_quiet"/>
+            </tree>
+        </field>
+    </record>
+    <record id="galacs_notification_action" model="ir.actions.act_window">
+        <field name="name">Notifications</field>
+        <field name="res_model">galacs.notification</field>
+        <field name="view_mode">list</field>
+    </record>
+    <menuitem id="galacs_menu_notifications"
+              name="Notifications"
+              parent="galacs_leads.galacs_menu_root"
+              action="galacs_notification_action"
+              sequence="80"/>
+</odoo>

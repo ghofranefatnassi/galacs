@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Les crons de rescoring IA (galacs.ia.pipeline) sont définis dans galacs_ia_pipeline/data/.
+        Le cron de rappel 72h (galacs.notification) est défini dans galacs_notifications/data/.
+        Ce fichier est intentionnellement vide de crons pour éviter les dépendances circulaires
+        lors de l'installation de galacs_leads seul.
+    -->
+</odoo>

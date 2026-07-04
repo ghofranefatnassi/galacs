@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Cron : clôture automatique des enchères expirées (toutes les minutes) -->
+    <record id="ir_cron_galacs_close_auctions" model="ir.cron">
+        <field name="name">Galacs – Clôture enchères expirées</field>
+        <field name="model_id" ref="galacs_encheres.model_galacs_enchere"/>
+        <field name="state">code</field>
+        <field name="code">
+expired = env['galacs.enchere'].search([
+    ('state', '=', 'open'),
+    ('date_end', '&lt;=', datetime.datetime.utcnow()),
+])
+for enc in expired:
+    enc._close_auction()
+        </field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+</odoo>

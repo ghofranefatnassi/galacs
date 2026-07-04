@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="galacs_commission_list_view" model="ir.ui.view">
+        <field name="name">galacs.commission.list</field>
+        <field name="model">galacs.commission</field>
+        <field name="arch" type="xml">
+            <tree string="Commissions" default_order="create_date desc">
+                <field name="create_date"/>
+                <field name="agent_id"/>
+                <field name="lead_id"/>
+                <field name="bid_percent"/>
+                <field name="prix_vente" widget="monetary"/>
+                <field name="montant_total" widget="monetary"/>
+                <field name="montant_agent" widget="monetary"/>
+                <field name="montant_galacs" widget="monetary"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    <record id="galacs_commission_form_view" model="ir.ui.view">
+        <field name="name">galacs.commission.form</field>
+        <field name="model">galacs.commission</field>
+        <field name="arch" type="xml">
+            <form string="Commission">
+                <header>
+                    <button name="action_marquer_versee" string="Marquer versée"
+                            type="object" invisible="state == 'versee'"
+                            class="btn-success" groups="base.group_system"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Vente">
+                            <field name="vente_id"/>
+                            <field name="lead_id"/>
+                            <field name="agent_id"/>
+                        </group>
+                        <group string="Calcul">
+                            <field name="prix_vente" widget="monetary"/>
+                            <field name="bid_percent"/>
+                            <field name="montant_total" widget="monetary"/>
+                        </group>
+                        <group string="Répartition">
+                            <field name="agent_share_percent"/>
+                            <field name="montant_agent" widget="monetary"/>
+                            <field name="galacs_share_percent"/>
+                            <field name="montant_galacs" widget="monetary"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="galacs_commission_action" model="ir.actions.act_window">
+        <field name="name">Commissions</field>
+        <field name="res_model">galacs.commission</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <menuitem id="galacs_menu_commissions"
+              name="Commissions"
+              parent="galacs_leads.galacs_menu_root"
+              action="galacs_commission_action"
+              sequence="40"/>
+</odoo>

@@ -1,0 +1,75 @@
+.enchereS1{
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;
+}
+.enchereS2{
+    display:flex;gap:8px;
+}
+.enchereS3{
+    display:flex;flex-direction:column;gap:12px;
+}
+.enchereS4{
+    background:linear-gradient(135deg,rgba(245,158,11,.05),var(--card));border:1px solid rgba(245,158,11,.2);border-radius:16px;padding:20px;cursor:pointer;
+}
+.enchereS5{
+    display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;
+}
+.enchereS6{
+    font-size:16px;font-weight:800;
+}
+.enchereS7{
+    margin-left:10px;font-size:12px;color:var(--muted);font-family:'Inter',sans-serif;
+}
+.enchereS8{
+    font-size:13px;color:var(--muted);margin-top:4px;
+}
+.enchereS9{
+    display:flex;align-items:center;gap:12px;
+}
+.enchereS10{
+    font-size:20px;font-weight:800;color:var(--orange);
+}
+.enchereS11{
+    display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:16px;align-items:center;
+}
+.enchereS12{
+    font-size:11px;color:var(--muted);margin-bottom:4px;
+}
+.enchereS13{
+    display:flex;align-items:center;gap:8px;
+}
+.enchereS14{
+    flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;
+}
+.enchereS15{
+    width:87%;height:100%;background:var(--green);border-radius:3px;
+}
+.enchereS16{
+    font-size:14px;font-weight:800;color:var(--green);
+}
+.enchereS17{
+    font-size:11px;color:var(--muted);margin-bottom:2px;
+}
+.enchereS18{
+    font-size:18px;font-weight:800;color:var(--orange);
+}
+.enchereS19{
+    font-size:18px;font-weight:800;
+}
+.enchereS20{
+    font-size:13px;font-weight:600;
+}
+.enchereS21{
+    display:flex;gap:6px;
+}
+.enchereS22{
+    background:var(--card);border:1px solid var(--border-n);border-radius:16px;padding:20px;cursor:pointer;
+}
+.enchereS23{
+    width:92%;height:100%;background:var(--green);border-radius:3px;
+}
+.enchereS24{
+    width:58%;height:100%;background:var(--orange);border-radius:3px;
+}
+.enchereS25{
+    font-size:14px;font-weight:800;color:var(--orange);
+}

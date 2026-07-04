@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vue formulaire enchère -->
+    <record id="galacs_enchere_form_view" model="ir.ui.view">
+        <field name="name">galacs.enchere.form</field>
+        <field name="model">galacs.enchere</field>
+        <field name="arch" type="xml">
+            <form string="Enchère Galacs.io">
+                <header>
+                    <button name="action_cancel" string="Annuler" type="object"
+                            invisible="state in ['closed','cancelled']"
+                            class="btn-danger" groups="base.group_system"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="pending,open,closed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Lead">
+                            <field name="lead_id"/>
+                            <field name="zone_chalandise"/>
+                            <field name="ia_category"/>
+                            <field name="score_maturity" widget="progressbar"/>
+                        </group>
+                        <group string="Enchère">
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="duration_minutes"/>
+                            <field name="min_bid_percent"/>
+                            <field name="current_bid_percent"/>
+                            <field name="winner_id"/>
+                            <field name="bid_count"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Historique des mises">
+                            <field name="bid_ids">
+                                <tree>
+                                    <field name="create_date"/>
+                                    <field name="agent_id"/>
+                                    <field name="bid_percent"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue liste enchères -->
+    <record id="galacs_enchere_list_view" model="ir.ui.view">
+        <field name="name">galacs.enchere.list</field>
+        <field name="model">galacs.enchere</field>
+        <field name="arch" type="xml">
+            <tree string="Enchères" default_order="date_start desc"
+                  decoration-success="state == 'open'"
+                  decoration-muted="state in ['closed','cancelled']">
+                <field name="lead_id"/>
+                <field name="zone_chalandise"/>
+                <field name="ia_category"/>
+                <field name="score_maturity"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="current_bid_percent"/>
+                <field name="bid_count"/>
+                <field name="winner_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="galacs_enchere_action" model="ir.actions.act_window">
+        <field name="name">Enchères</field>
+        <field name="res_model">galacs.enchere</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="galacs_menu_encheres"
+              name="Enchères"
+              parent="galacs_leads.galacs_menu_root"
+              action="galacs_enchere_action"
+              sequence="10"/>
+</odoo>

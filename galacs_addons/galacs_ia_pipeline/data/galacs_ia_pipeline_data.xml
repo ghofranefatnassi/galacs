@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Paramètres système Galacs.io – Pipeline IA -->
+    <record id="param_n8n_webhook_url" model="ir.config_parameter">
+        <field name="key">galacs.n8n_webhook_url</field>
+        <field name="value">https://n8n.world-wild-web.fr/webhook/galacs-scoring</field>
+    </record>
+    <record id="param_n8n_shared_token" model="ir.config_parameter">
+        <field name="key">galacs.n8n_shared_token</field>
+        <field name="value">CHANGE_ME_IN_PRODUCTION</field>
+    </record>
+    <record id="param_gemma4_error_threshold" model="ir.config_parameter">
+        <field name="key">galacs.gemma4_error_rate_threshold</field>
+        <field name="value">5.0</field>
+    </record>
+    <record id="param_gemma4_ollama_url" model="ir.config_parameter">
+        <field name="key">galacs.gemma4_ollama_url</field>
+        <field name="value">http://localhost:11434/api/generate</field>
+    </record>
+    <record id="param_gemma4_model" model="ir.config_parameter">
+        <field name="key">galacs.gemma4_model</field>
+        <field name="value">gemma4:latest</field>
+    </record>
+
+    <!-- Cron : rescoring automatique Gemma 4 (leads non scorés depuis 7 jours) -->
+    <record id="ir_cron_galacs_rescore" model="ir.cron">
+        <field name="name">Galacs – Rescoring IA périodique (7 jours)</field>
+        <field name="model_id" ref="galacs_ia_pipeline.model_galacs_ia_pipeline"/>
+        <field name="state">code</field>
+        <field name="code">
+cutoff = fields.Datetime.to_string(fields.Datetime.subtract(fields.Datetime.now(), days=7))
+leads = env['crm.lead'].search([
+    ('ia_scored_at', '&lt;', cutoff),
+    ('ia_fallback', '=', False),
+    ('galacs_stage', 'not in', ['won', 'lost']),
+])
+for lead in leads:
+    env['galacs.ia.pipeline'].sudo()._send_to_n8n(lead)
+        </field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- Cron : rescoring des leads en fallback IA (retry toutes les heures) -->
+    <record id="ir_cron_galacs_rescore_fallback" model="ir.cron">
+        <field name="name">Galacs – Rescoring leads fallback IA</field>
+        <field name="model_id" ref="galacs_ia_pipeline.model_galacs_ia_pipeline"/>
+        <field name="state">code</field>
+        <field name="code">
+leads = env['crm.lead'].search([('ia_fallback', '=', True)])
+for lead in leads:
+    env['galacs.ia.pipeline'].sudo()._send_to_n8n(lead)
+        </field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">hours</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- Cron : monitoring taux d'erreur Gemma 4 (1h glissante) -->
+    <record id="ir_cron_galacs_gemma4_monitor" model="ir.cron">
+        <field name="name">Galacs – Monitoring taux erreur Gemma 4</field>
+        <field name="model_id" ref="galacs_ia_pipeline.model_galacs_ia_pipeline"/>
+        <field name="state">code</field>
+        <field name="code">env['galacs.ia.pipeline'].sudo()._check_error_rate()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">hours</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+</odoo>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vue liste logs import Waalaxy -->
+    <record id="galacs_external_import_list_view" model="ir.ui.view">
+        <field name="name">galacs.external.import.list</field>
+        <field name="model">galacs.external.import</field>
+        <field name="arch" type="xml">
+            <tree string="Imports Waalaxy" default_order="create_date desc"
+                  decoration-danger="dedup_blocked == True"
+                  decoration-success="dedup_blocked == False and lead_id != False">
+                <field name="create_date"/>
+                <field name="source"/>
+                <field name="lead_id"/>
+                <field name="linkedin_url"/>
+                <field name="email"/>
+                <field name="dropcontact_found"/>
+                <field name="dedup_blocked"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="galacs_external_import_form_view" model="ir.ui.view">
+        <field name="name">galacs.external.import.form</field>
+        <field name="model">galacs.external.import</field>
+        <field name="arch" type="xml">
+            <form string="Log Import Waalaxy" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <group string="Résultat">
+                            <field name="source"/>
+                            <field name="lead_id"/>
+                            <field name="dedup_blocked"/>
+                            <field name="dropcontact_found"/>
+                        </group>
+                        <group string="Identifiants">
+                            <field name="linkedin_url" widget="url"/>
+                            <field name="email"/>
+                        </group>
+                    </group>
+                    <group string="Payload brut n8n">
+                        <field name="raw_payload" nolabel="1" widget="text" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="galacs_external_import_action" model="ir.actions.act_window">
+        <field name="name">Imports Waalaxy</field>
+        <field name="res_model">galacs.external.import</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="galacs_menu_external_import"
+              name="Imports Waalaxy"
+              parent="galacs_leads.galacs_menu_root"
+              action="galacs_external_import_action"
+              sequence="60"
+              groups="base.group_system"/>
+</odoo>

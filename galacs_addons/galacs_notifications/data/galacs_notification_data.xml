@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Cron : rappel suivi 72h pour les leads sans mise à jour -->
+    <record id="ir_cron_galacs_followup_72h" model="ir.cron">
+        <field name="name">Galacs – Rappel suivi 72h agents</field>
+        <field name="model_id" ref="galacs_notifications.model_galacs_notification"/>
+        <field name="state">code</field>
+        <field name="code">
+cutoff = fields.Datetime.to_string(fields.Datetime.subtract(fields.Datetime.now(), hours=72))
+leads = env['crm.lead'].search([
+    ('galacs_stage', 'in', ['contacted', 'meeting', 'devis']),
+    ('write_date', '&lt;=', cutoff),
+    ('user_id', '!=', False),
+])
+for lead in leads:
+    env['galacs.notification'].sudo()._notify_followup_72h(lead)
+        </field>
+        <field name="interval_number">6</field>
+        <field name="interval_type">hours</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+</odoo>

@@ -1,0 +1,267 @@
+.enchereS1 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.enchereS2 {
+  margin-bottom: 20px;
+  align-items: start;
+}
+
+.enchereS3 {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.enchereS4 {
+  background: linear-gradient(135deg, #140F36, #0C1428);
+  border: 1px solid var(--border2);
+  border-radius: 18px;
+  padding: 24px;
+}
+
+.enchereS5 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.enchereS6 {
+  background: rgba(245, 158, 11, .15);
+  border: 1px solid rgba(245, 158, 11, .3);
+  color: var(--orange);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  animation: bpulse 1.5s infinite;
+}
+
+.enchereS7 {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.enchereS8 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--orange);
+}
+
+.enchereS9 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.enchereS10 {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+.enchereS11 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.enchereS12 {
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.enchereS13 {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.enchereS14 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--green);
+}
+
+.enchereS15 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--orange);
+}
+
+.enchereS16 {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.enchereS17 {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 10px;
+}
+
+.enchereS18 {
+  color: #a78bfa;
+  font-weight: 600;
+}
+
+.enchereS19 {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.enchereS20 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.enchereS21 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.enchereS22 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--orange);
+}
+
+.enchereS23 {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), #d97706);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.enchereS24 {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #059669, var(--green));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.enchereS25 {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--red), #b91c1c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.enchereS26 {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.enchereS27 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.enchereS28 {
+  width: 34px;
+  height: 34px;
+  font-size: 12px;
+}
+
+.enchereLiveContainer {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+  min-height: calc(100vh - var(--topbar-h));
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124, 58, 237, .3) transparent;
+}
+
+.enchereLiveContainer::-webkit-scrollbar {
+  width: 4px;
+}
+
+.enchereLiveContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.enchereLiveContainer::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, .3);
+  border-radius: 2px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.enchereRankingCard {
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.enchereRankingCard .enchereS27 {
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.enchereRankingCard .enchereS27::-webkit-scrollbar {
+  width: 3px;
+}
+
+@media (max-width: 768px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  .enchereS4 {
+    padding: 18px;
+  }
+  
+  .enchereS9 {
+    font-size: 18px;
+  }
+  
+  .enchereS11 {
+    grid-template-columns: 1fr;
+  }
+}

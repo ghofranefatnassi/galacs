@@ -1,0 +1,194 @@
+.leadsS1{
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;
+}
+.leadsS2{
+    display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;
+}
+.leadsS3{
+    color:var(--muted);font-size:12px;
+}
+.leadsS4{
+    display:flex;align-items:center;gap:6px;
+}
+.leadsS5{
+    width:60px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;
+}
+.leadsS6{
+    width:87%;height:100%;background:var(--green);border-radius:2px;
+}
+.leadsS7{
+    font-size:12px;font-weight:700;color:var(--green);
+}
+.leadsS8{
+    width:92%;height:100%;background:var(--green);border-radius:2px;
+}
+.leadsS9{
+    width:95%;height:100%;background:var(--green);border-radius:2px;
+}
+.leadsS10{
+    width:58%;height:100%;background:var(--orange);border-radius:2px;
+}
+.leadsS11{
+    font-size:12px;font-weight:700;color:var(--orange);
+}
+.leadsS12{
+    width:28%;height:100%;background:var(--red);border-radius:2px;
+}
+.leadsS13{
+    font-size:12px;font-weight:700;color:var(--red);
+}
+.leadsS14{
+    font-size:12px;color:var(--muted);
+}
+/* Modal overlay */
+.modal-overlay-crm {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-container-crm {
+  background: #0f1123;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.modal-icon-crm {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.modal-title-crm {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #f1f5f9;
+}
+
+.modal-message-crm {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+.modal-actions-crm {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.modal-btn-crm {
+  padding: 8px 18px;
+  border-radius: 40px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.modal-btn-cancel {
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+.modal-btn-cancel:hover {
+  background: #334155;
+}
+
+.modal-btn-confirm {
+  background: #f59e0b;
+  color: #0f172a;
+}
+
+.modal-btn-confirm:hover {
+  background: #fbbf24;
+  transform: scale(1.02);
+}
+
+/* Toast */
+.toast-crm {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1100;
+  animation: slideInRight 0.3s ease;
+}
+
+.toast-content-crm {
+  background: #1e293b;
+  border-left: 4px solid #22c55e;
+  border-radius: 12px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  min-width: 260px;
+}
+
+.toast-icon-crm {
+  background: #22c55e20;
+  border-radius: 40px;
+  padding: 6px;
+  color: #22c55e;
+}
+
+.toast-title-crm {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin: 0;
+  color: #f1f5f9;
+}
+
+.toast-desc-crm {
+  font-size: 0.8rem;
+  margin: 2px 0 0;
+  color: #94a3b8;
+}
+
+.toast-close-crm {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: auto;
+}
+
+.toast-close-crm:hover {
+  color: #f1f5f9;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

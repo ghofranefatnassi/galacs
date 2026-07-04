@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================================ -->
+    <!--  galacs_leads – Vues crm.lead enrichies Galacs.io               -->
+    <!-- ================================================================ -->
+
+    <!-- Ajout d'un onglet Galacs sur la fiche lead CRM -->
+    <!--
+        Odoo 17 : la vue parente est crm.crm_lead_view_form (et non crm_lead_all_leads).
+        L'élément notebook se trouve dans //sheet/notebook.
+        Le bouton de rescoring est placé dans le header (pas dans <footer> à l'intérieur d'une page).
+    -->
+    <record id="galacs_lead_form_view" model="ir.ui.view">
+        <field name="name">crm.lead.form.galacs</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Ajout du bouton Rescoring dans le header de la fiche lead -->
+            <xpath expr="//header" position="inside">
+                <button name="action_request_rescore"
+                        string="Rescoring Gemma 4"
+                        type="object"
+                        class="btn-secondary"/>
+            </xpath>
+            <!-- Ajout de l'onglet Galacs.io dans le notebook existant -->
+            <xpath expr="//sheet//notebook" position="inside">
+                <page string="Galacs.io – IA &amp; Suivi" name="galacs_tab">
+                    <group string="Score IA – Gemma 4 Local">
+                        <field name="score_maturity" widget="progressbar"/>
+                        <field name="ia_category"/>
+                        <field name="ia_scored_at"/>
+                        <field name="ia_fallback"/>
+                        <field name="ia_version"/>
+                        <field name="ia_justification"/>
+                    </group>
+                    <group string="Informations Métier">
+                        <field name="lead_type"/>
+                        <field name="zone_chalandise"/>
+                        <field name="type_bien"/>
+                        <field name="budget_estime" widget="monetary"/>
+                        <field name="source_lead"/>
+                        <field name="linkedin_url" widget="url"/>
+                    </group>
+                    <group string="Suivi Obligatoire 72h – Anti-triche">
+                        <field name="galacs_stage"/>
+                        <field name="date_contacted" readonly="1"/>
+                        <field name="date_meeting" readonly="1"/>
+                        <field name="date_devis" readonly="1"/>
+                        <field name="date_won_galacs" readonly="1"/>
+                    </group>
+                    <group string="Comportement Site Web">
+                        <field name="comportement_site" nolabel="1"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vue liste IA logs -->
+    <record id="galacs_ia_log_list_view" model="ir.ui.view">
+        <field name="name">galacs.ia.log.list</field>
+        <field name="model">galacs.ia.log</field>
+        <field name="arch" type="xml">
+            <tree string="Logs Gemma 4" default_order="create_date desc">
+                <field name="create_date"/>
+                <field name="lead_id"/>
+                <field name="score"/>
+                <field name="category"/>
+                <field name="fallback"/>
+                <field name="model_version"/>
+                <field name="duration_ms"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action menu IA logs -->
+    <record id="galacs_ia_log_action" model="ir.actions.act_window">
+        <field name="name">Logs IA Gemma 4</field>
+        <field name="res_model">galacs.ia.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="galacs_menu_root"
+              name="Galacs.io"
+              sequence="50"/>
+    <menuitem id="galacs_menu_ia_logs"
+              name="Logs IA Gemma 4"
+              parent="galacs_menu_root"
+              action="galacs_ia_log_action"
+              sequence="90"/>
+</odoo>

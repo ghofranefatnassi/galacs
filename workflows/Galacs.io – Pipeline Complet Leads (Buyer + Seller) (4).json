@@ -1,0 +1,720 @@
+{
+  "name": "Galacs.io – Pipeline Complet Leads (Buyer + Seller)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "galacs-scoring",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "e91d188a-835e-428f-8e3f-19414389b57b",
+      "name": "Webhook Waalaxy – Entrée Principale",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        144
+      ],
+      "webhookId": "galacs-waalaxy-import",
+      "notes": "Point d'entrée unique pour les 2 campagnes Waalaxy.\nPayload Waalaxy inclut : firstName, lastName, linkedinUrl, company, zone, campaignName, source.\ncampaignName permet de détecter automatiquement buyer ou seller."
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Étape 1 : Validation + Détection Automatique buyer/seller ────────\nconst body = $input.first().json.body || $input.first().json;\n\n// Extraction champs Waalaxy\nconst firstName   = (body.firstName   || body.first_name  || '').trim();\nconst lastName    = (body.lastName    || body.last_name   || '').trim();\nconst linkedinUrl = (body.linkedinUrl || body.linkedin_url || body.linkedin || '').trim();\nconst company     = (body.company     || body.organization || '').trim();\nconst zone        = (body.zone        || body.location     || body.city    || '').trim();\nconst campaignName = (body.campaignName || body.campaign_name || body.listName || '').toLowerCase();\nconst email        = body.email || '';\n\n// Validation minimale\nif (!firstName && !lastName && !linkedinUrl) {\n  throw new Error('Payload Waalaxy invalide : nom ou LinkedIn URL obligatoire.');\n}\n\n// ── Détection automatique lead_type depuis le nom de campagne ──────\n// Campagne Acheteurs  : contient 'achet', 'buyer', 'acquér', 'invest', 'premier', 'achat'\n// Campagne Vendeurs   : contient 'vend', 'seller', 'mandat', 'proprié', 'cession'\nlet lead_type = 'buyer'; // défaut : acheteur\n\nconst sellerKeywords = ['vend', 'seller', 'mandat', 'proprié', 'cession', 'heritage', 'succession', 'dpe'];\nconst buyerKeywords  = ['achet', 'buyer', 'acquér', 'invest', 'premier', 'achat', 'recherch'];\n\nconst isSellerCampaign = sellerKeywords.some(kw => campaignName.includes(kw));\nconst isBuyerCampaign  = buyerKeywords.some(kw  => campaignName.includes(kw));\n\nif (isSellerCampaign && !isBuyerCampaign) {\n  lead_type = 'seller';\n} else {\n  lead_type = 'buyer';\n}\n\n// Normalisation URL LinkedIn\nlet cleanLinkedin = linkedinUrl;\nif (cleanLinkedin && !cleanLinkedin.startsWith('http')) {\n  cleanLinkedin = 'https://linkedin.com/in/' + cleanLinkedin;\n}\n\nreturn [{\n  json: {\n    firstName,\n    lastName,\n    fullName: (firstName + ' ' + lastName).trim(),\n    linkedinUrl: cleanLinkedin,\n    company,\n    zone,\n    email,\n    lead_type,\n    campaignName,\n    source: 'waalaxy',\n    raw_payload: JSON.stringify(body)\n  }\n}];"
+      },
+      "id": "32f50c93-f770-4937-923f-c438507c4805",
+      "name": "Détecter lead_type (buyer / seller)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        144
+      ],
+      "notes": "Détecte automatiquement buyer ou seller depuis le nom de campagne Waalaxy.\nCampagne Acheteurs → lead_type = buyer\nCampagne Vendeurs  → lead_type = seller"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-seller",
+              "leftValue": "={{ $json.lead_type }}",
+              "rightValue": "seller",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "14693cb5-55aa-4b57-a071-541dd89c1f48",
+      "name": "Routage buyer / seller",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        144
+      ],
+      "notes": "Branch TRUE  → Campagne Vendeurs (seller)\nBranch FALSE → Campagne Acheteurs (buyer)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Construction prompt Gemma 4 – ACHETEUR (BUYER) ──────────────────\nconst d = $input.first().json;\n\nconst prompt = `Tu es un expert en scoring de leads immobiliers. Analyse ce profil ACHETEUR et retourne UNIQUEMENT un objet JSON valide, sans markdown.\n\nPROFIL ACHETEUR:\n- Nom: ${d.fullName}\n- Entreprise: ${d.company}\n- Zone recherchée: ${d.zone}\n- Source: ${d.source}\n- LinkedIn: ${d.linkedinUrl}\n\nCritères de scoring ACHETEUR (capacité financière, urgence projet, engagement):\n- Score élevé (70-100) = prêt à acheter, projet immédiat, budget confirmé\n- Score moyen (40-70) = projet à 3-6 mois, intérêt confirmé\n- Score faible (0-40) = intention vague, projet long terme\n\nRéponds UNIQUEMENT avec ce JSON (rien d'autre):\n{\"score\": <entier 0-100>, \"category\": \"hot\" ou \"warm\" ou \"cold\", \"justification\": \"<une phrase courte>\"}`;\n\nreturn [{ json: { ...d, gemma_prompt: prompt } }];"
+      },
+      "id": "9c2e7323-a976-442f-82a3-53242f857438",
+      "name": "Construire Prompt Buyer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "notes": "Prompt Gemma 4 adapté aux acheteurs.\nCritères : capacité financière, urgence, engagement LinkedIn."
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Construction prompt Gemma 4 – VENDEUR (SELLER) ──────────────────\nconst d = $input.first().json;\n\nconst prompt = `Tu es un expert en scoring de leads immobiliers. Analyse ce profil VENDEUR et retourne UNIQUEMENT un objet JSON valide, sans markdown.\n\nPROFIL VENDEUR:\n- Nom: ${d.fullName}\n- Entreprise: ${d.company}\n- Zone du bien: ${d.zone}\n- Source: ${d.source}\n- LinkedIn: ${d.linkedinUrl}\n- Campagne: ${d.campaignName}\n\nCritères de scoring VENDEUR (urgence de vente, signaux comportementaux):\n- Score élevé (70-100) = urgence forte (succession, DPE récent, >7 ans de propriété, listé sans agence)\n- Score moyen (40-70) = intention de vente confirmée, délai 3-6 mois\n- Score faible (0-40) = signal faible, réflexion préliminaire\n\nRéponds UNIQUEMENT avec ce JSON (rien d'autre):\n{\"score\": <entier 0-100>, \"category\": \"hot\" ou \"warm\" ou \"cold\", \"justification\": \"<une phrase courte>\"}`;\n\nreturn [{ json: { ...d, gemma_prompt: prompt } }];"
+      },
+      "id": "a2598057-ca14-41fb-afca-f12cbdfa1b2e",
+      "name": "Construire Prompt Seller",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        288
+      ],
+      "notes": "Prompt Gemma 4 adapté aux vendeurs.\nCritères : succession, DPE, durée propriété, listing sans agence."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ollama:11434/api/chat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer sk-d0d4512d71fe4c73a14f1dce36f14175"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"gemma4:latest\", messages: [{ role: \"system\", content: \"Tu es un expert en scoring de leads immobiliers. Retourne UNIQUEMENT un objet JSON valide, sans markdown.\" }, { role: \"user\", content: $json.gemma_prompt }], stream: false, temperature: 0.1 }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "2414496a-64cd-4a41-908a-9df65b3af8ec",
+      "name": "Gemma 4 – Scoring Buyer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "notes": "Appel Gemma 4 via Open WebUI pour les acheteurs.\nURL : https://chat.world-wild-web.fr/api/chat/completions\nRemplace YOUR_OPENWEBUI_API_KEY"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ollama:11434/api/chat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer sk-d0d4512d71fe4c73a14f1dce36f14175"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"gemma4:latest\", messages: [{ role: \"system\", content: \"Tu es un expert en scoring de leads immobiliers. Retourne UNIQUEMENT un objet JSON valide, sans markdown.\" }, { role: \"user\", content: $json.gemma_prompt }], stream: false, temperature: 0.1 }) }}{{ JSON.stringify({ model: \"gemma4:latest\", messages: [{ role: \"system\", content: \"Tu es un expert en scoring de leads immobiliers. Retourne UNIQUEMENT un objet JSON valide, sans markdown.\" }, { role: \"user\", content: $json.gemma_prompt }], stream: false, temperature: 0.1 }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "8d1d2f1c-2384-4ec2-9b0a-5a5292540c84",
+      "name": "Gemma 4 – Scoring Seller",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        288
+      ],
+      "notes": "Appel Gemma 4 via Open WebUI pour les vendeurs.\nPrompt adapté aux signaux vendeurs (succession, DPE, etc.)."
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Parser réponse Gemma 4 – format OpenAI (choices[0].message.content) ──\nconst gemmaResponse = $input.first().json;\nconst inputData     = $('Construire Prompt Buyer').first().json;\n\nlet score = 50, category = 'warm', justification = 'Scoring automatique Gemma 4', ia_fallback = false;\n\ntry {\n  const rawText = (\n    gemmaResponse?.choices?.[0]?.message?.content ||\n    gemmaResponse?.message?.content ||\n    gemmaResponse?.response || '{}'\n  ).trim()\n   .replace(/```json\\s*/gi, '')\n   .replace(/```\\s*/g, '')\n   .trim();\n\n  const parsed = JSON.parse(rawText);\n  score = Math.max(0, Math.min(100, parseInt(parsed.score) || 50));\n  justification = parsed.justification || 'Scoring Gemma 4 buyer';\n\n  const rawCat = (parsed.category || '').toLowerCase();\n  if (['hot', 'chaud'].includes(rawCat) || score > 70)       category = 'hot';\n  else if (['cold', 'froid'].includes(rawCat) || score < 40) category = 'cold';\n  else                                                         category = 'warm';\n\n} catch(e) {\n  ia_fallback = true;\n  score = 50; category = 'warm';\n  justification = 'Fallback – erreur parsing Gemma 4 buyer: ' + e.message;\n  console.error('[Galacs BUYER] Parsing error:', e.message);\n}\n\nreturn [{ json: { ...inputData, score, category, justification, ia_fallback, model_version: 'gemma4:latest' } }];"
+      },
+      "id": "51b919e1-19b6-44c3-86eb-db7eab32e7fa",
+      "name": "Parser Score Buyer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Parser réponse Gemma 4 – format OpenAI (choices[0].message.content) ──\nconst gemmaResponse = $input.first().json;\nconst inputData     = $('Construire Prompt Seller').first().json;\n\nlet score = 50, category = 'warm', justification = 'Scoring automatique Gemma 4', ia_fallback = false;\n\ntry {\n  const rawText = (\n    gemmaResponse?.choices?.[0]?.message?.content ||\n    gemmaResponse?.message?.content ||\n    gemmaResponse?.response || '{}'\n  ).trim()\n   .replace(/```json\\s*/gi, '')\n   .replace(/```\\s*/g, '')\n   .trim();\n\n  const parsed = JSON.parse(rawText);\n  score = Math.max(0, Math.min(100, parseInt(parsed.score) || 50));\n  justification = parsed.justification || 'Scoring Gemma 4 seller';\n\n  const rawCat = (parsed.category || '').toLowerCase();\n  if (['hot', 'chaud'].includes(rawCat) || score > 70)       category = 'hot';\n  else if (['cold', 'froid'].includes(rawCat) || score < 40) category = 'cold';\n  else                                                         category = 'warm';\n\n} catch(e) {\n  ia_fallback = true;\n  score = 50; category = 'warm';\n  justification = 'Fallback – erreur parsing Gemma 4 seller: ' + e.message;\n  console.error('[Galacs SELLER] Parsing error:', e.message);\n}\n\nreturn [{ json: { ...inputData, score, category, justification, ia_fallback, model_version: 'gemma4:latest' } }];"
+      },
+      "id": "7255e403-c50b-4957-9d6b-70acaeff2942",
+      "name": "Parser Score Seller",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.dropcontact.com/v1/enrich/all",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Access-Token",
+              "value": "72b90719-8807-4bdf-a3f0-168b913641e8"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": [\n    {\n      \"first_name\": \"{{ $json.firstName }}\",\n      \"last_name\": \"{{ $json.lastName }}\",\n      \"company\": \"{{ $json.company }}\"\n    }\n  ],\n  \"siren\": true,\n  \"language\": \"FR\"\n}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "6a20da84-e3a9-4fc6-8a28-c862561bb450",
+      "name": "Dropcontact – Enrichissement Buyer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "notes": "Enrichissement email professionnel RGPD pour les acheteurs.\nRemplace YOUR_DROPCONTACT_API_KEY"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.dropcontact.com/v1/enrich/all",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Access-Token",
+              "value": "72b90719-8807-4bdf-a3f0-168b913641e8"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": [\n    {\n      \"first_name\": \"{{ $json.firstName }}\",\n      \"last_name\": \"{{ $json.lastName }}\",\n      \"company\": \"{{ $json.company }}\"\n    }\n  ],\n  \"siren\": true,\n  \"language\": \"FR\"\n}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "6f396373-fec6-4270-8fbd-16e8f0166ab0",
+      "name": "Dropcontact – Enrichissement Seller",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        288
+      ],
+      "notes": "Enrichissement email professionnel RGPD pour les vendeurs.\nRemplace YOUR_DROPCONTACT_API_KEY"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Fusion Score Buyer + Email Dropcontact ────────────────────────────\nconst scoredData = $('Parser Score Buyer').first().json;\nconst dropResp   = $input.first().json;\n\nlet email = scoredData.email || '';\nlet dropcontact_found = false;\n\ntry {\n  const data = dropResp.data || dropResp.contacts || [];\n  if (data.length > 0) {\n    const contact = data[0];\n    const emails  = contact.email || [];\n    if (Array.isArray(emails) && emails.length > 0) {\n      const best = emails.sort((a, b) => (b.confidence || 0) - (a.confidence || 0))[0];\n      if (best?.email) { email = best.email; dropcontact_found = true; }\n    } else if (typeof emails === 'string' && emails.includes('@')) {\n      email = emails; dropcontact_found = true;\n    }\n  }\n} catch(e) { dropcontact_found = false; }\n\nreturn [{ json: { ...scoredData, email, dropcontact_found } }];"
+      },
+      "id": "7396dc3c-ea56-4670-b95b-e498e7d002da",
+      "name": "Fusionner Buyer (Score + Email)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Fusion Score Seller + Email Dropcontact ────────────────────────────\nconst scoredData = $('Parser Score Seller').first().json;\nconst dropResp   = $input.first().json;\n\nlet email = scoredData.email || '';\nlet dropcontact_found = false;\n\ntry {\n  const data = dropResp.data || dropResp.contacts || [];\n  if (data.length > 0) {\n    const contact = data[0];\n    const emails  = contact.email || [];\n    if (Array.isArray(emails) && emails.length > 0) {\n      const best = emails.sort((a, b) => (b.confidence || 0) - (a.confidence || 0))[0];\n      if (best?.email) { email = best.email; dropcontact_found = true; }\n    } else if (typeof emails === 'string' && emails.includes('@')) {\n      email = emails; dropcontact_found = true;\n    }\n  }\n} catch(e) { dropcontact_found = false; }\n\nreturn [{ json: { ...scoredData, email, dropcontact_found } }];"
+      },
+      "id": "1ff95952-0c66-49f0-8465-5313d50e9d35",
+      "name": "Fusionner Seller (Score + Email)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://odoo.world-wild-web.fr/api/external_leads/import",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Galacs-Token",
+              "value": "HrIK+XDsHz1U6stPLD6myvvU3ZGkMlMV+mua5WO0FR4SdGSK+0V2AAT2UUp1l1o2yODbk82NCvOsEc5BBZfCvmYb+3alYW8EcjoXckICJDhaq/cqvqDV5L/lAQ=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "55c777d5-255a-497d-9ebb-de5a349af7b8",
+      "name": "Import Odoo – Buyer Lead",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "WdAEKTxNkFWkuR4c",
+          "name": "Header Auth account"
+        }
+      },
+      "notes": "Envoie le lead acheteur à Odoo.\nlead_type = buyer dans le payload.\nRemplace YOUR_ODOO_URL et YOUR_GALACS_SHARED_TOKEN"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://odoo.world-wild-web.fr/api/external_leads/import",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Galacs-Token",
+              "value": "HrIK+XDsHz1U6stPLD6myvvU3ZGkMlMV+mua5WO0FR4SdGSK+0V2AAT2UUp1l1o2yODbk82NCvOsEc5BBZfCvmYb+3alYW8EcjoXckICJDhaq/cqvqDV5L/lAQ=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "31205756-5f6d-4d2e-b603-cbd5423c70b1",
+      "name": "Import Odoo – Seller Lead",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        288
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "WdAEKTxNkFWkuR4c",
+          "name": "Header Auth account"
+        }
+      },
+      "notes": "Envoie le lead vendeur à Odoo.\nlead_type = seller dans le payload.\nRemplace YOUR_ODOO_URL et YOUR_GALACS_SHARED_TOKEN"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Vérification réponse Odoo Buyer ────────────────────────────────────\nconst odooResp = $input.first().json;\nconst lead     = $('Fusionner Buyer (Score + Email)').first().json;\n\n// Unwrap JSON-RPC wrapper { jsonrpc, id, result: {...} }\nconst result        = odooResp.result || odooResp;\n\nconst success       = result.success === true;\nconst dedup_blocked = result.dedup_blocked === true;\nconst lead_id       = result.lead_id || null;\n\nconsole.log(`[Galacs BUYER] \"${lead.fullName}\" | success=${success} | dedup=${dedup_blocked} | lead_id=${lead_id} | score=${lead.score}% | category=${lead.category}`);\n\nif (!success && !dedup_blocked) {\n  throw new Error(`Odoo buyer import failed: ${result.error || 'Unknown error'}`);\n}\n\nreturn [{ json: {\n  success,\n  dedup_blocked,\n  lead_id,\n  lead_type: 'buyer',\n  lead_name: lead.fullName,\n  email:     lead.email,\n  score:     lead.score,\n  category:  lead.category,\n  timestamp: new Date().toISOString(),\n  message:   result.message || (dedup_blocked ? 'Doublon buyer bloqué (30j)' : 'Lead buyer créé avec succès')\n} }];"
+      },
+      "id": "86399051-6057-41e3-9384-206d39d8ce92",
+      "name": "Vérifier Réponse Odoo – Buyer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Vérification réponse Odoo Seller ─────────────────────────────────\nconst odooResp = $input.first().json;\nconst lead     = $('Fusionner Seller (Score + Email)').first().json;\n\nconst success       = odooResp.success === true;\nconst dedup_blocked = odooResp.dedup_blocked === true;\nconst lead_id       = odooResp.lead_id || null;\n\nconsole.log(`[Galacs SELLER] \"${lead.fullName}\" | success=${success} | dedup=${dedup_blocked} | lead_id=${lead_id} | score=${lead.score}% | category=${lead.category}`);\n\nif (!success && !dedup_blocked) {\n  throw new Error(`Odoo seller import failed: ${odooResp.error || 'Unknown error'}`);\n}\n\nreturn [{ json: { success, dedup_blocked, lead_id, lead_type: 'seller',\n  lead_name: lead.fullName, email: lead.email, score: lead.score,\n  category: lead.category, timestamp: new Date().toISOString(),\n  message: odooResp.message || (dedup_blocked ? 'Doublon seller bloqué (30j)' : 'Lead seller créé avec succès') } }];"
+      },
+      "id": "33a02810-fe04-4489-811e-2ee51be085c0",
+      "name": "Vérifier Réponse Odoo – Seller",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: $json.success, lead_id: $json.lead_id, lead_type: $json.lead_type, dedup_blocked: $json.dedup_blocked, score: $json.score, category: $json.category, message: $json.message }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "26a359f9-a525-4cd0-939b-e9859be8d197",
+      "name": "Réponse Waalaxy OK – Buyer",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1872,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: $json.success, lead_id: $json.lead_id, lead_type: $json.lead_type, dedup_blocked: $json.dedup_blocked, score: $json.score, category: $json.category, message: $json.message }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "18dd427d-f5ea-4014-ad0b-7bac79132365",
+      "name": "Réponse Waalaxy OK – Seller",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://odoo.world-wild-web.fr/api/leads/import_ia",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Galacs-Token",
+              "value": "HrIK+XDsHz1U6stPLD6myvvU3ZGkMlMV+mua5WO0FR4SdGSK+0V2AAT2UUp1l1o2yODbk82NCvOsEc5BBZfCvmYb+3alYW8EcjoXckICJDhaq/cqvqDV5L/lAQ=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"lead_id\":      \"{{ $json.lead_id }}\",\n  \"score\":        \"{{ $json.score }}\",\n  \"category\":     \"{{ $json.category }}\",\n  \"justification\":\"{{ $('Parser Score Buyer').first().json.justification }}\",\n  \"version\":      \"gemma4:latest\",\n  \"fallback\":     \"{{ $('Parser Score Buyer').first().json.ia_fallback }}\",\n  \"duration_ms\":  0\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1648,
+        0
+      ],
+      "id": "229e59be-7ea4-4730-ba7b-d5147fe9473f",
+      "name": "Callback Score IA → Odoo Buyer"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Waalaxy – Entrée Principale": {
+      "main": [
+        [
+          {
+            "node": "Détecter lead_type (buyer / seller)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Détecter lead_type (buyer / seller)": {
+      "main": [
+        [
+          {
+            "node": "Routage buyer / seller",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Routage buyer / seller": {
+      "main": [
+        [
+          {
+            "node": "Construire Prompt Seller",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Construire Prompt Buyer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Construire Prompt Buyer": {
+      "main": [
+        [
+          {
+            "node": "Gemma 4 – Scoring Buyer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Construire Prompt Seller": {
+      "main": [
+        [
+          {
+            "node": "Gemma 4 – Scoring Seller",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemma 4 – Scoring Buyer": {
+      "main": [
+        [
+          {
+            "node": "Parser Score Buyer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemma 4 – Scoring Seller": {
+      "main": [
+        [
+          {
+            "node": "Parser Score Seller",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Score Buyer": {
+      "main": [
+        [
+          {
+            "node": "Dropcontact – Enrichissement Buyer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Score Seller": {
+      "main": [
+        [
+          {
+            "node": "Dropcontact – Enrichissement Seller",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dropcontact – Enrichissement Buyer": {
+      "main": [
+        [
+          {
+            "node": "Fusionner Buyer (Score + Email)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dropcontact – Enrichissement Seller": {
+      "main": [
+        [
+          {
+            "node": "Fusionner Seller (Score + Email)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fusionner Buyer (Score + Email)": {
+      "main": [
+        [
+          {
+            "node": "Import Odoo – Buyer Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fusionner Seller (Score + Email)": {
+      "main": [
+        [
+          {
+            "node": "Import Odoo – Seller Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Import Odoo – Buyer Lead": {
+      "main": [
+        [
+          {
+            "node": "Vérifier Réponse Odoo – Buyer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Import Odoo – Seller Lead": {
+      "main": [
+        [
+          {
+            "node": "Vérifier Réponse Odoo – Seller",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vérifier Réponse Odoo – Buyer": {
+      "main": [
+        [
+          {
+            "node": "Callback Score IA → Odoo Buyer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vérifier Réponse Odoo – Seller": {
+      "main": [
+        [
+          {
+            "node": "Réponse Waalaxy OK – Seller",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Callback Score IA → Odoo Buyer": {
+      "main": [
+        [
+          {
+            "node": "Réponse Waalaxy OK – Buyer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5129860c-cd94-49e3-ba4c-4a1a80ee48de",
+  "meta": {
+    "instanceId": "0356b649b335f6cc4a24ec6b9fcc6768d13f97ad2914e79d8e06fc7463475f44"
+  },
+  "id": "sszdODoZ1oauzp48",
+  "tags": [
+    {
+      "updatedAt": "2026-05-24T13:12:07.868Z",
+      "createdAt": "2026-05-24T13:12:07.868Z",
+      "id": "4j5CbFCL3Fwq5Fcg",
+      "name": "galacs.io"
+    },
+    {
+      "updatedAt": "2026-06-02T13:38:10.640Z",
+      "createdAt": "2026-06-02T13:38:10.640Z",
+      "id": "8HSf8UhAuhcmMOhn",
+      "name": "buyer"
+    },
+    {
+      "updatedAt": "2026-06-02T13:38:10.634Z",
+      "createdAt": "2026-06-02T13:38:10.634Z",
+      "id": "EJiBjZgjFFzatY6f",
+      "name": "seller"
+    },
+    {
+      "updatedAt": "2026-05-24T13:12:07.910Z",
+      "createdAt": "2026-05-24T13:12:07.910Z",
+      "id": "F9azb7qCpl5bn4qW",
+      "name": "waalaxy"
+    },
+    {
+      "updatedAt": "2026-05-24T13:12:07.956Z",
+      "createdAt": "2026-05-24T13:12:07.956Z",
+      "id": "i6NA0jZqSxnat0Fg",
+      "name": "gemma4"
+    },
+    {
+      "updatedAt": "2026-05-24T13:12:07.935Z",
+      "createdAt": "2026-05-24T13:12:07.935Z",
+      "id": "qsKrIWQUl6Tkosz9",
+      "name": "leads"
+    }
+  ]
+}

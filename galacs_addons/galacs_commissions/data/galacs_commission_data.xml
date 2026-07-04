@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Paramètres par défaut de répartition commission (modifiables via Paramètres > Technique) -->
+    <record id="param_commission_agent_share" model="ir.config_parameter">
+        <field name="key">galacs.commission_agent_share</field>
+        <field name="value">70.0</field>
+    </record>
+    <record id="param_commission_galacs_share" model="ir.config_parameter">
+        <field name="key">galacs.commission_galacs_share</field>
+        <field name="value">30.0</field>
+    </record>
+    <record id="param_auction_duration" model="ir.config_parameter">
+        <field name="key">galacs.auction_duration_minutes</field>
+        <field name="value">60</field>
+    </record>
+    <record id="param_min_bid" model="ir.config_parameter">
+        <field name="key">galacs.min_bid_percent</field>
+        <field name="value">3.0</field>
+    </record>
+    <record id="param_vente_mode" model="ir.config_parameter">
+        <field name="key">galacs.vente_verification_mode</field>
+        <field name="value">manual</field>
+    </record>
+</odoo>

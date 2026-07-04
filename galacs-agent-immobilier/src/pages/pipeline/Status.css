@@ -1,0 +1,57 @@
+.statusS1{
+    display:flex;align-items:center;gap:12px;margin-bottom:24px;
+}
+.statusS2{
+    display:flex;flex-direction:column;gap:16px;
+}
+.statusS3{
+    display:flex;align-items:center;gap:12px;margin-bottom:14px;
+}
+.statusS4{
+    width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;flex-shrink:0;
+}
+.statusS5{
+    font-size:16px;font-weight:700;
+}
+.statusS6{
+    font-size:12px;color:var(--muted);
+}
+.statusS7{
+    background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:12px;font-size:13px;color:var(--orange);
+}
+.statusS8{
+    display:flex;flex-direction:column;gap:10px;
+}
+.statusS9{
+    display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,.03);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s;
+}
+.statusS10{
+    width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;
+}
+.statusS11{
+    font-size:14px;font-weight:600;
+}
+.statusS12{
+    font-size:12px;color:var(--muted);margin-top:2px;
+}
+.statusS13{
+    font-size:11px;color:var(--muted);background:rgba(255,255,255,.05);padding:3px 8px;border-radius:6px;
+}
+.statusS14{
+    width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;
+}
+.statusS15{
+    display:flex;align-items:center;gap:12px;padding:14px;background:rgba(124,58,237,.1);border:1.5px solid var(--border2);border-radius:12px;cursor:pointer;
+}
+.statusS16{
+    width:22px;height:22px;border-radius:50%;background:var(--accent);border:2px solid var(--accent);flex-shrink:0;display:flex;align-items:center;justify-content:center;
+}
+.statusS17{
+    display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,.02);border:1.5px solid var(--border);border-radius:12px;cursor:not-allowed;opacity:.5;
+}
+.statusS18{
+    width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;
+}
+.statusS19{
+    font-size:11px;color:var(--red);background:rgba(239,68,68,.08);padding:3px 8px;border-radius:6px;
+}
